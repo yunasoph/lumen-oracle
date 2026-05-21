@@ -15,6 +15,7 @@ const router = Router();
 
 router.post(
   '/checkout',
+  apiRateLimiter,
   requireAuth,
   validateBody(z.object({ plan: z.enum(['oracle', 'cosmic']) })),
   createCheckout,
