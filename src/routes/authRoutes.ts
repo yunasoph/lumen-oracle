@@ -11,11 +11,13 @@ import {
   resetPassword,
   updateMe,
 } from '../controllers/authController';
-import { loginRateLimiter } from '../middleware/rateLimiters';
+import { apiRateLimiter, loginRateLimiter } from '../middleware/rateLimiters';
 import { requireAuth } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 
 const router = Router();
+
+router.use(apiRateLimiter);
 
 router.post(
   '/register',

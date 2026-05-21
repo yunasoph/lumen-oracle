@@ -23,6 +23,15 @@ export const loginRateLimiter = rateLimit({
   message: { message: 'Too many login attempts. Try again later.' },
 });
 
+export const apiRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: buildRedisStore(),
+  message: { message: 'Too many requests. Please slow down.' },
+});
+
 const memoryCounts = new Map<string, { count: number; expiresAt: number }>();
 
 const getTarotLimit = (plan: string) => {

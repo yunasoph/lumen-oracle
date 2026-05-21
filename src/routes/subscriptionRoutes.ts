@@ -8,6 +8,7 @@ import {
   handleWebhook,
 } from '../controllers/subscriptionController';
 import { requireAuth } from '../middleware/auth';
+import { apiRateLimiter } from '../middleware/rateLimiters';
 import { validateBody } from '../middleware/validate';
 
 const router = Router();
@@ -19,6 +20,8 @@ router.post(
   createCheckout,
 );
 router.post('/webhook', handleWebhook);
+
+router.use(apiRateLimiter);
 router.get('/status', requireAuth, getStatus);
 router.post('/cancel', requireAuth, cancelSubscription);
 router.post('/portal', requireAuth, createPortal);

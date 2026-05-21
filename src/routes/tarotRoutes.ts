@@ -3,9 +3,11 @@ import { z } from 'zod';
 import { drawCards, getCard, getReading, listCards, listReadings } from '../controllers/tarotController';
 import { optionalAuth, requireAuth } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
-import { tarotRateLimiter } from '../middleware/rateLimiters';
+import { apiRateLimiter, tarotRateLimiter } from '../middleware/rateLimiters';
 
 const router = Router();
+
+router.use(apiRateLimiter);
 
 router.get('/cards', listCards);
 router.get('/cards/:id', getCard);

@@ -2,9 +2,12 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { getStats, listUsers, upsertHoroscopes } from '../controllers/adminController';
 import { requireAdmin, requireAuth } from '../middleware/auth';
+import { apiRateLimiter } from '../middleware/rateLimiters';
 import { validateBody } from '../middleware/validate';
 
 const router = Router();
+
+router.use(apiRateLimiter);
 
 router.post(
   '/horoscopes',

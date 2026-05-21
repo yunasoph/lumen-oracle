@@ -2,9 +2,12 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { generateChart, getMyChart } from '../controllers/chartController';
 import { requireAuth } from '../middleware/auth';
+import { apiRateLimiter } from '../middleware/rateLimiters';
 import { validateBody } from '../middleware/validate';
 
 const router = Router();
+
+router.use(apiRateLimiter);
 
 router.post(
   '/generate',

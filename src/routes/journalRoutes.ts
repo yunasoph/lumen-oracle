@@ -2,9 +2,12 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { createEntry, deleteEntry, listEntries, updateEntry } from '../controllers/journalController';
 import { requireAuth } from '../middleware/auth';
+import { apiRateLimiter } from '../middleware/rateLimiters';
 import { validateBody } from '../middleware/validate';
 
 const router = Router();
+
+router.use(apiRateLimiter);
 
 router.get('/', requireAuth, listEntries);
 router.post(

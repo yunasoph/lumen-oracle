@@ -9,6 +9,7 @@ jest.mock('../../src/config/redis', () => {
 });
 jest.mock('../../src/middleware/rateLimiters', () => ({
   loginRateLimiter: (_req: any, _res: any, next: any) => next(),
+  apiRateLimiter: (_req: any, _res: any, next: any) => next(),
   tarotRateLimiter: (_req: any, _res: any, next: any) => next(),
 }));
 
