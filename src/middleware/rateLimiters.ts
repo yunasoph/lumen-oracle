@@ -6,7 +6,7 @@ import { getUserPlan } from '../services/subscriptionService';
 import { AppError } from '../utils/appError';
 
 const buildRedisStore = () => {
-  if (!redis.isOpen) {
+  if (!redis.isOpen || process.env.NODE_ENV === 'test') {
     return undefined;
   }
   return new RedisStore({

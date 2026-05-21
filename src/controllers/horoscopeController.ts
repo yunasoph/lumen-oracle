@@ -18,29 +18,32 @@ const fetchHoroscope = async (sign: string, period: 'daily' | 'weekly' | 'monthl
   });
 };
 
-export const getHoroscope = asyncHandler(async (req: Request, res: Response) => {
-  const { sign, period } = req.params as { sign: string; period: string };
-  const normalized = `${sign.charAt(0).toUpperCase()}${sign.slice(1).toLowerCase()}`;
-  const periodType = period as 'daily' | 'weekly' | 'monthly' | 'yearly';
-  if (!['daily', 'weekly', 'monthly', 'yearly'].includes(periodType)) {
-    throw new AppError('Invalid period type', 400);
-  }
+const buildGetHoroscope =
+  (periodType: 'daily' | 'weekly' | 'monthly' | 'yearly') =>
+  asyncHandler(async (req: Request, res: Response) => {
+    const { sign } = req.params as { sign: string };
+    const normalized = `${sign.charAt(0).toUpperCase()}${sign.slice(1).toLowerCase()}`;
 
-  const date = getPeriodDate();
-  const cacheKey = `horoscope:${periodType}:${normalized}:${date.toISOString()}`;
-  const cached = await getCached(cacheKey);
-  if (cached) {
-    return res.json(cached);
-  }
+    const date = getPeriodDate();
+    const cacheKey = `horoscope:${periodType}:${normalized}:${date.toISOString()}`;
+    const cached = await getCached(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
 
-  const horoscope = await fetchHoroscope(normalized, periodType);
-  if (!horoscope) {
-    throw new AppError('Horoscope not found', 404);
-  }
+    const horoscope = await fetchHoroscope(normalized, periodType);
+    if (!horoscope) {
+      throw new AppError('Horoscope not found', 404);
+    }
 
-  await setCached(cacheKey, horoscope, 60 * 60 * 24);
-  return res.json(horoscope);
-});
+    await setCached(cacheKey, horoscope, 60 * 60 * 24);
+    return res.json(horoscope);
+  });
+
+export const getDailyHoroscope = buildGetHoroscope('daily');
+export const getWeeklyHoroscope = buildGetHoroscope('weekly');
+export const getMonthlyHoroscope = buildGetHoroscope('monthly');
+export const getYearlyHoroscope = buildGetHoroscope('yearly');
 
 export const getDailyAll = asyncHandler(async (_req: Request, res: Response) => {
   const date = getPeriodDate();

@@ -2,13 +2,25 @@ import { Request, Response } from 'express';
 import { prisma } from '../config/prisma';
 import { asyncHandler } from '../utils/asyncHandler';
 
+type HoroscopeEntryInput = {
+  zodiac_sign: string;
+  period_type: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  period_date: string | Date;
+  theme: string;
+  content: string;
+  lucky_number?: number;
+  lucky_color?: string;
+  energy_rating?: number;
+  compatibility_sign?: string;
+};
+
 export const upsertHoroscopes = asyncHandler(async (req: Request, res: Response) => {
-  const { entries } = req.body as { entries: Array<Record<string, unknown>> };
+  const { entries } = req.body as { entries: HoroscopeEntryInput[] };
   if (!Array.isArray(entries)) {
     return res.status(422).json({ message: 'Entries must be an array' });
   }
 
-  const normalized = entries.map((entry) => ({
+  const normalized: HoroscopeEntryInput[] = entries.map((entry) => ({
     ...entry,
     period_date: new Date(entry.period_date as string),
   }));

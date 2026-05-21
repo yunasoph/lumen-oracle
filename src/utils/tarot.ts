@@ -1,4 +1,9 @@
-import { TarotCard, TarotSpreadType } from '@prisma/client';
+type TarotSpreadType = 'single' | 'three_card' | 'celtic_cross';
+
+type TarotCard = {
+  id: number;
+  name: string;
+};
 
 const spreadSizes: Record<TarotSpreadType, number> = {
   single: 1,
