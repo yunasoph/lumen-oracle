@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum HoroscopePeriodType {
+  daily
+  weekly
+  monthly
+  yearly
+}
+
+enum TarotArcana {
+  major
+  minor
+}
+
+enum TarotSpreadType {
+  single
+  three_card
+  celtic_cross
+}
+
+enum JournalMood {
+  radiant
+  reflective
+  turbulent
+  grounded
+  expansive
+}
+
+enum CosmicIntensity {
+  gentle
+  moderate
+  powerful
+  transformative
+}
+
+enum SubscriptionPlan {
+  free
+  oracle
+  cosmic
+}
+
+enum SubscriptionStatus {
+  active
+  cancelled
+  past_due
+}
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  email           String   @unique @db.VarChar(255)
+  username        String?  @unique @db.VarChar(255)
+  password_hash   String?  @db.Text
+  full_name       String?  @db.VarChar(255)
+  birth_date      DateTime? @db.Date
+  birth_time      DateTime? @db.Time
+  birth_city      String?  @db.VarChar(255)
+  birth_country   String?  @db.VarChar(255)
+  birth_latitude  Decimal? @db.Decimal(9, 6)
+  birth_longitude Decimal? @db.Decimal(9, 6)
+  sun_sign        String   @db.VarChar(32)
+  moon_sign       String?  @db.VarChar(32)
+  rising_sign     String?  @db.VarChar(32)
+  avatar_url      String?  @db.Text
+  is_premium      Boolean  @default(false)
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @updatedAt @db.Timestamp(6)
+
+  birth_charts         BirthChart[]
+  tarot_readings       TarotReading[]
+  journal_entries      UserJournalEntry[]
+  subscriptions        UserSubscription[]
+  compatibility_reports CompatibilityReport[] @relation("CompatibilityRequester")
+
+  @@index([sun_sign])
+  @@index([email])
+  @@map("users")
+}
+
+model Horoscope {
+  id                 String               @id @default(uuid()) @db.Uuid
+  zodiac_sign        String               @db.VarChar(32)
+  period_type        HoroscopePeriodType
+  period_date        DateTime             @db.Date
+  theme              String               @db.VarChar(100)
+  content            String               @db.Text
+  lucky_number       Int?
+  lucky_color        String?              @db.VarChar(50)
+  energy_rating      Int?
+  compatibility_sign String?              @db.VarChar(32)
+  created_at         DateTime             @default(now()) @db.Timestamp(6)
+
+  @@index([zodiac_sign, period_type, period_date])
+  @@map("horoscopes")
+}
+
+model BirthChart {
+  id               String   @id @default(uuid()) @db.Uuid
+  user_id          String   @db.Uuid
+  chart_data       Json
+  houses           Json
+  aspects          Json
+  dominant_element String   @db.VarChar(16)
+  dominant_modality String  @db.VarChar(16)
+  chart_svg_url    String?  @db.Text
+  generated_at     DateTime @default(now()) @db.Timestamp(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("birth_charts")
+}
+
+model TarotCard {
+  id               Int        @id
+  name             String     @db.VarChar(255)
+  arcana           TarotArcana
+  suit             String?    @db.VarChar(50)
+  number           Int
+  upright_meaning  String     @db.Text
+  reversed_meaning String     @db.Text
+  image_url        String     @db.Text
+  keywords         String[]   @db.Text
+  element          String     @db.VarChar(50)
+  astro_connection String     @db.VarChar(50)
+
+  @@map("tarot_cards")
+}
+
+model TarotReading {
+  id            String          @id @default(uuid()) @db.Uuid
+  user_id       String?         @db.Uuid
+  spread_type   TarotSpreadType
+  question      String?         @db.Text
+  cards_drawn   Json
+  interpretation String         @db.Text
+  session_token String?         @db.VarChar(255)
+  created_at    DateTime        @default(now()) @db.Timestamp(6)
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@map("tarot_readings")
+}
+
+model MoonPhase {
+  id                Int     @id @default(autoincrement())
+  phase_name        String  @db.VarChar(100)
+  phase_date        DateTime @db.Date
+  phase_time        DateTime @db.Time
+  zodiac_sign       String  @db.VarChar(32)
+  ritual_suggestion String  @db.Text
+  affirmation       String  @db.Text
+
+  journal_entries UserJournalEntry[]
+
+  @@map("moon_phases")
+}
+
+model UserJournalEntry {
+  id            String      @id @default(uuid()) @db.Uuid
+  user_id       String      @db.Uuid
+  title         String      @db.VarChar(255)
+  content       String      @db.Text
+  mood          JournalMood
+  moon_phase_id Int?
+  tags          String[]?   @db.Text
+  created_at    DateTime    @default(now()) @db.Timestamp(6)
+
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  moon_phase MoonPhase? @relation(fields: [moon_phase_id], references: [id], onDelete: SetNull)
+
+  @@map("user_journal_entries")
+}
+
+model CosmicEvent {
+  id             String           @id @default(uuid()) @db.Uuid
+  event_type     String           @db.VarChar(100)
+  title          String           @db.VarChar(255)
+  description    String           @db.Text
+  start_date     DateTime         @db.Date
+  end_date       DateTime?        @db.Date
+  affected_signs String[]         @db.Text
+  intensity      CosmicIntensity
+  icon_name      String           @db.VarChar(100)
+
+  @@index([start_date])
+  @@map("cosmic_events")
+}
+
+model UserSubscription {
+  id                   String             @id @default(uuid()) @db.Uuid
+  user_id              String             @db.Uuid
+  plan                 SubscriptionPlan
+  stripe_subscription_id String           @db.VarChar(255)
+  stripe_customer_id   String             @db.VarChar(255)
+  status               SubscriptionStatus
+  current_period_start DateTime           @db.Timestamp(6)
+  current_period_end   DateTime           @db.Timestamp(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_subscriptions")
+}
+
+model CompatibilityReport {
+  id                 String   @id @default(uuid()) @db.Uuid
+  requester_user_id  String?  @db.Uuid
+  sign_a             String   @db.VarChar(32)
+  sign_b             String   @db.VarChar(32)
+  overall_score      Int
+  love_score         Int
+  communication_score Int
+  trust_score        Int
+  passion_score      Int
+  report_text        String   @db.Text
+  created_at         DateTime @default(now()) @db.Timestamp(6)
+
+  requester_user User? @relation("CompatibilityRequester", fields: [requester_user_id], references: [id], onDelete: SetNull)
+
+  @@map("compatibility_reports")
+}
