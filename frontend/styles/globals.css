@@ -1,0 +1,122 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --gold: #c9a84c;
+  --moonlight: #f0eee9;
+  --obsidian: #0a0a0f;
+  --font-display: "Cormorant Garamond", serif;
+  --font-body: "DM Sans", sans-serif;
+}
+
+@layer base {
+  html {
+    @apply h-full scroll-smooth;
+  }
+
+  body {
+    @apply min-h-full bg-obsidian text-moonlight font-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-moonlight;
+  }
+
+  p {
+    @apply text-base leading-relaxed text-moonlight/80;
+  }
+}
+
+@layer components {
+  .cosmic-border {
+    @apply border border-gold/40 shadow-gold-soft backdrop-blur-sm;
+  }
+
+  .gold-shimmer {
+    background: linear-gradient(
+      110deg,
+      rgba(201, 168, 76, 0.2) 0%,
+      rgba(242, 228, 187, 0.9) 45%,
+      rgba(201, 168, 76, 0.2) 60%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 3.2s ease-in-out infinite;
+  }
+
+  .gold-outline {
+    @apply border border-gold/60 text-gold;
+  }
+}
+
+@layer utilities {
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(201, 168, 76, 0.2), transparent 45%),
+    radial-gradient(circle at 80% 30%, rgba(45, 27, 78, 0.5), transparent 40%),
+    radial-gradient(circle at 50% 60%, rgba(26, 74, 74, 0.35), transparent 50%),
+    #0a0a0f;
+  overflow: hidden;
+}
+
+.starfield::before,
+.starfield::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background-image: radial-gradient(#ffffff 0.6px, transparent 0.6px);
+  background-size: 140px 140px;
+  opacity: 0.4;
+  animation: twinkle 14s linear infinite;
+}
+
+.starfield::after {
+  background-size: 240px 240px;
+  opacity: 0.25;
+  animation-duration: 22s;
+}
+
+@keyframes twinkle {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-5%, -8%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starfield::before,
+  .starfield::after {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
